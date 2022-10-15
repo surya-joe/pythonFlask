@@ -1,0 +1,336 @@
+1, create todo app folder
+
+2, create virtualenv env
+
+3, create app.py
+
+4, activate virtualenv -> source env/bin/activate
+
+5, pip3 install flask flask-sqlalchemy
+
+6, app.py
+    from flask import Flask
+    app = Flask(__name__)
+
+    @app.route('/')
+    def index():
+        return '<h1>HelloWorld</h1> 
+
+    if __name__ == '__main__':
+        app.run(debug=True)
+
+7, Enable debugger mode 
+    in terminal: export FLASK_DEBUG = 1 
+
+8, run flask app.py
+    * flask run
+    * flask filename run 
+    * python app.py 
+
+9, create 2 folder inside your todo app
+    1, static(F) -> css(F) -> style.css 
+    2, templates(F) -> base.html
+                    -> index.html
+
+10, base.html with jinja2 templates
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+    </html>
+
+11, link style.css 
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/style.css')}}">
+
+12, Link index.html to base.html 
+        {% extends 'base.html' %}
+
+        {% block head %}
+        <title> Flask To-Do </title>
+        {% endblock %}
+
+        {% block body %}
+        <h1>Steve Roger</h1>
+        {% endblock %}
+
+13, connect db 
+        from flask import Flask,render_template,url_for
+        from flask_sqlalchemy import SQLAlchemy
+        from datetime import datetime
+
+        app = Flask(__name__)
+
+        # define db 
+        db = SQLAlchemy(app)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todo.db'
+        db.init_app(app)
+
+        class Todo(db.Model):
+            id = db.Column(db.Integer, primary_key=True)
+            content = db.Column(db.String(200), nullable=False)
+            date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+            def __repr__(self):
+                return '<Task %r>' % self.id 
+
+        @app.route('/')
+        def index():
+            return render_template('index.html')
+
+        if __name__ == '__main__':
+            app.run(debug=True)
+
+14, create a new db
+    Go to python terminal : from app import db 
+                            db.create_all()
+                            exit()
+                            
+15, Create a content in index.html:
+        {% block body %}
+            <div class="content">
+                <h1>Todo List</h1>
+
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Added</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <a href="">Update</a>
+                            <br>
+                            <a href="">Delete</a>
+                        </td>
+                    </tr>
+                </table>
+                <form action="/" method="POST">
+                    <input type="text" name="content" id="content ">
+                    <input type="submit" value="Update Task">
+                </form>
+            </div>      
+        {% endblock %}      
+
+16, Add routing methods:
+        @app.route('/', methods=['POST','GET'])
+        def index():
+            if request.method == 'POST':
+                return 'hello'
+            else:
+                return render_template('index.html')
+
+17, Get the content from the { Form in index.html }
+        @app.route('/', methods=['POST','GET'])
+        def index():
+            if request.method == 'POST':
+------------>   task_content = request.form['content']
+            else:
+                return render_template('index.html')
+
+18, create a new task from the 
+    { class Todo(db.Model) }
+        @app.route('/', methods=['POST','GET'])
+        def index():
+            if request.method == 'POST':
+                task_content = request.form['content']
+--------------> new_task = Todo(content=task_content)
+            else:
+                return render_template('index.html')    
+
+19, Render the created tasks to the template
+    app.py
+    ------
+        @app.route('/', methods=['POST','GET'])
+        def index():
+            if request.method == 'POST':
+                # request the content from the FORM in index.html
+                task_content = request.form['content']
+                new_task = Todo(content=task_content)
+
+                try:
+                    db.session.add(new_task)
+                    db.session.commit()
+                    return redirect('/')
+                except:
+                    return 'Error in addin a task!'
+
+            else:
+                tasks = Todo.query.order_by(Todo.date_created).all()
+    --------->  return render_template('index.html', tasks=tasks)               
+
+    index.html
+    ----------
+        {% block body %}
+            <div class="content">
+                <h1>Todo List</h1>
+
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Added</th>
+                        <th>Actions</th>
+                    </tr>
+    ----------->    {% for task in tasks %}
+                        <tr>
+        ---------->         <td>{{ task.content }}</td>
+        ---------->         <td>{{ task.date_created.date() }}</td>
+                            <td>
+                                <a href="">Update</a>
+                                <br>
+                                <a href="">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <form action="/" method="POST">
+                    <input type="text" name="content" id="content ">
+                    <input type="submit" value="Add-Task">
+                </form>
+            </div>
+        {% endblock %}
+
+20, Delete an task in the template
+    app.py
+    ------
+        create a new route named Delete:
+
+            @app.route('/delete/<int:id>')
+            def delete(id):
+                task_to_delete = Todo.query.get_or_404(id)
+                try:
+                    db.session.delete(task_to_delete)
+                    db.session.commit()
+                    return redirect('/')
+                except:
+                    return 'Error in Deleting a task'   
+
+    Call the delete function we created:
+    index.html
+    ----------
+        {% for task in tasks %}
+            <tr>
+                <td>{{ task.content }}</td>
+                <td>{{ task.date_created.date() }}</td>
+                <td>
+                    <a href="">Update</a>
+                    <br>
+    ----------->    <a href="/delete/{{ task.id }}">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+21, Update a task:
+    app.py
+    ------
+        @app.route('/update/<int:id>', methods=['GET','POST'])
+        def update(id):
+            task = Todo.query.get_or_404(id)
+            if request.method == 'POST':
+                task.content = request.form['content']
+                try:
+                    db.session.commit()
+                    return redirect('/')
+                except:
+                    return 'Error in Updating a task!'  
+            else:
+                return render_template('update.html', task=task)
+
+22, create a new HTML file named { update.html }
+    update.html
+    -----------
+        {% extends 'base.html' %}
+
+        {% block head %}
+        <title> Flask To-Do </title>
+        {% endblock %}
+
+        {% block body %}
+            <h1>Update the task</h1>
+            <div class="content">
+    ------->    <form action="/update/{{ task.id }}" method="POST">
+    ------->    <input value="{{ task.content }}"
+                            type="text" 
+                            name="content" 
+                            id="content ">
+                    <input type="submit" value="update-Task">
+                </form>
+            </div>
+        {% endblock %}
+
+23, Create a condition to Check the tasks are empty or not;
+    index.html
+    ----------
+        {% extends 'base.html' %}
+
+        {% block head %}
+        <title> Flask To-Do </title>
+        {% endblock %}
+
+        {% block body %}
+            <div class="content">
+                <h1>Todo List</h1>
+    ------->    {% if tasks|length < 1 %}
+    ------->        <h4> There a no tasks, Create new one belowe. </h4>
+    ------->    {% else %}
+                    <table>
+                        <tr>
+                            <th>Task</th>
+                            <th>Added</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.content }}</td>
+                                <td>{{ task.date_created.date() }}</td>
+                                <td>
+                                    <a href="/update/{{ task.id }}">Update</a>
+                                    <br>
+                                    <a href="/delete/{{ task.id }}">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+    ------->    {% endif %}
+                <form action="/" method="POST">
+                    <input type="text" name="content" id="content">
+                    <input type="submit" value="Add-Task">
+                </form>
+            </div>
+        {% endblock %}
+
+24, Run the app.py
+        To-Do flask app created successfully....
+
+25, Create a requirements.txt file:
+        pip3 freeze > requirements.txt
+
+26, Create a Procfile for heroku:
+        * In env termilal :
+            pip3 install gunicorn(which is a library used to deploy our app in heroku) 
+        * In env terminal:
+            touch Procfile
+        * In Procfile write:
+            web: gunicorn app:app
+
+27, Deploy it into { Heroku }
+    * create an account in Heroku
+    * heroku login
+    * git init
+    * git add .
+    * git commit -m 'init app'
+    * heroku create appname (appName must be in small case letters)
+    * git push heroku master
+
+28, Now the deployment link for our app is created successfully.
+
