@@ -243,3 +243,26 @@
             </div>
        {% endif %}
     </div>
+
+6, Deploy the app in Heroku:
+
+    * pip3 install gunicorn
+    
+    * touch Procfile 
+        write to the Procfile:
+            web: gunicorn app:app
+    
+    * Create requirements.txt 
+        pip3 freeze > requirements.txt 
+    
+    * heroku login 
+    * git init 
+    * git add . 
+    * git commit -m 'initapp'
+    * heroku create flask-app-weather-app 
+    * git push heroku master 
+
+    link : https://flask-app-weather-app.herokuapp.com/
+
+7, Push the app into GitHub 
+    *
