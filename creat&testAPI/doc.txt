@@ -1,0 +1,5 @@
+API tester - Thunder Client 
+https://dev.to/dzun_n/no-need-postman-your-vscode-is-enough-for-testing-your-api-2khg
+
+project source:
+https://machinelearningprojects.net/create-an-api-in-flask/
