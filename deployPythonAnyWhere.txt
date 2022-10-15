@@ -1,0 +1,18 @@
+1, Create an account in pythonanywhere:
+    link : https://www.pythonanywhere.com
+
+2,  * Click on Next.
+    * Select Flask on the Next Screen.
+    * Then Select the Python version you want to work in. I selected Python 3.9 & Flask 2.0.0.
+
+3, select the path to your python flask app.py file:
+    /home/suryaJoe/ - default home dir in pythonanywhere.
+    our relative path : /home/suryaJoe/ubuntu/workspace/myWork/python/flask_python/weatherApp
+
+4, Creat a folders to store your original files:
+    * add the files to your respective folder.
+
+5, Go to web --> (click) Reload suryaJoe.pythonanywhere.com
+
+6, your web app deployed successfully.
+    link : http://suryajoe.pythonanywhere.com/
