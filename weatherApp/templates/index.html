@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container">
+
+        <h1>Live Weather Forecast <img id="cloudImg" src="{{ condition_icon }}"></img></h1>
+
+        <form action="/weather_report" method="POST">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search" name="cityName">
+                <input class="btn btn-outline-secondary btn-primary" type="submit" value="Get Report" id="searchBtn">
+            </div>              
+        </form>
+
+       {% if name %}
+            <div class="row">
+                <p>Current Temperature in "<b>{{ name }}</b>" </p>
+            </div>
+            <div class="row">
+                <p>{{ temp_c }}°C / {{ temp_f }} °F</p>
+            </div>
+            <div class="row">
+                <p> <b>Last Update</b> <br> {{ last_update }} </p>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p> <b>Time Zone</b> <br> {{ timeZone }}</p>
+                </div>
+                <div class="col">
+                    <p><b>Local Time</b> <br> {{ localTime }}</p>
+                </div>
+                <div class="col">
+                    <p><b>Condition</b> <br> {{ condition_text }}</p>
+                </div>
+                <div class="col">
+                    <p><b>Wind Speed</b> <br> {{ windKph }} KPM</p>
+                </div>
+            </div>
+       {% endif %}
+
+       {% if error %}
+            <div class="row">
+                <h2>{{ error }}</h2>
+            </div>
+       {% endif %}
+    </div>
+{% endblock %}
