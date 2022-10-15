@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Greetings App</title>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <form action="greet" method="POST">
+            {% for message in get_flashed_messages() %}
+                <p> {{ message }} </p>
+            {% endfor %}
+            <input type="text" id="userInput"  name="nameInput" placeholder="Enter your name" >
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+{% endblock%}

@@ -1,0 +1,136 @@
+Simple Greetings app using Flask
+
+1, Create GreetingsFlaskApp folder
+
+2, Inside GreetingsFlaskApp folder:
+    Create ---> app.py
+           ---> static ---> css ---> styel.css
+           ---> templates ---> base.html
+                          ---> index.html
+
+3, In app.py create a boiler template:
+
+    from flask import Flask,render_template,flash,request
+
+    app = Flask(__name__)
+    app.secret_key = 'secret key'
+
+    @app.route('/')
+    def index():
+        return 'Hello world'
+
+    if __name__ == ('__main__'):
+        app.run(debug=True)
+
+4, Connect index.html base.html
+
+    {% extends 'base.html' %}
+
+    {% block head %}
+        <title>Greetings App</title>
+    {% endblock %}
+
+    {% block body %}
+       <h1>Hello world</h1>
+    {% endblock%}
+
+5, In index.html :
+    create a form take an input and submit that input
+
+    <div class="container">
+        <form action="greet" method="post">
+            <input type="text" name="nameInput" placeholder="Enter your name" >
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+6, In app.py get the user_input:
+    create a new route with methods:
+        @app.route('/greet', methods=['POST','GET'])
+        def greet():
+            input_name = request.form['nameInput']
+            return render_template('index.html')
+
+7, How to get the user inputName and populate into the message?
+    using { get_flashed_messages() } method:
+
+    index.html
+    ----------
+        {% block body %}
+            <div class="container">
+                <form action="greet" method="post">
+        ------->    {% for message in get_flashed_messages() %}
+        ------->        <p> {{ message }} </p>
+                    {% endfor %}
+                    <input type="text"  name="nameInput" placeholder="Enter your name" >
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        {% endblock%}
+
+    app.py
+    ------
+        @app.route('/')
+        def index():
+    ----->  flash("What's your name?")
+            return render_template('index.html')
+
+        @app.route('/greet', methods=['POST','GET'])
+        def greet():
+            input_name = request.form['nameInput']
+    ----->  flash('Hi ' + str(input_name) + ', great to see you')
+            return render_template('index.html')
+
+8, create a explore.html :
+    To redirect to home page:
+    explore.html:
+    -------------
+        {% extends 'base.html' %}
+
+        {% block head %}
+            <title>Greetings App</title>
+        {% endblock %}
+
+        {% block body %}
+            <div class="container">
+                <form action="/" >
+                    {% for message in get_flashed_messages() %}
+                        <p> {{ message }} </p>
+                    {% endfor %}
+                    <input type="submit" value="Explore">
+                </form>
+            </div>
+        {% endblock%}
+
+9, Check the input is a valid one or not:
+    Eliminate empty string('') and empty space('  ')
+    @app.route('/greet', methods=['POST','GET'])
+    def greet():
+        input_name = request.form['nameInput']
+----->  if input_name.strip() != '':
+            flash('Hi ' + str(input_name) + ', Great to see you.')
+            return render_template('explore.html')
+----->  else:
+            flash('Name cann\'t be empty string') 
+            return render_template('index.html')
+
+
+9, Deploy it into heroku:
+    * Install gunicorn to deploy in heroku:
+        pip3 install gunicorn
+
+    * Create a Procfile for heroku reference
+        1, touch Procfile
+            web: gunicorn app:app 
+
+    * create a requirements.txt 
+        pip3 freeze > requirements.txt 
+
+    * heroku login 
+    * git init 
+    * git add .
+    * git commit -m 'init app'
+    * heroku create flask-greetings-app
+    *git push heroku master
+
+10, Open the heroku serve link to see our app.
